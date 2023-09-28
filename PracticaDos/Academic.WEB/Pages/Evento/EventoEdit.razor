@@ -1,0 +1,70 @@
+﻿@page "/eventos/edit/{Id:int}"
+@using Academic.Shared.Entities;
+@inject NavigationManager navigationManager
+@inject IRepository repository
+@inject SweetAlertService swal
+
+<h3>Editar Evento</h3>
+
+@if (Evento is null)
+{
+    <div class="align-items-center">
+        <img src=" https://img.pikbest.com/png-images/20190918/cartoon-snail-loading-loading-gif-animation_2734139.png!bw700 " />
+    </div>
+}
+else
+{
+    <EventoForm @ref="EventoForm" Evento="Evento" OnSubmit="Edit" ReturnAction="Return" />
+}
+
+@code {
+    private Evento? Evento;
+    private EventoForm? eventoForm;
+
+    [Parameter]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var responseHTTP = await repository.Get<Evento>($"api/eventos/{Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("eventos");
+            }
+            else
+            {
+                var messageError = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", messageError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            Evento = responseHTTP.Response;
+        }
+    }
+
+    private async Task Edit()
+    {
+        var responseHTTP = await repository.Put("api/eventos", evento);
+
+        if (responseHTTP.Error)
+        {
+            var mensajeError = await responseHTTP.GetErrorMessageAsync();
+            await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+        }
+        else
+        {
+            EventoForm!.FormPostedSuccessfully = true;
+            navigationManager.NavigateTo("eventos");
+        }
+    }
+
+    private void Return()
+    {
+        navigationManager.NavigateTo("eventos");
+    }
+}
+

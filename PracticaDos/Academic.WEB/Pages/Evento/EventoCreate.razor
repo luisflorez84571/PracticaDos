@@ -1,0 +1,32 @@
+﻿@page "/eventos/create"
+@using Academic.Shared.Entities;
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Crear Evento</h3>
+
+<EventoForm @ref="EventoForm" Evento="Evento" OnSubmit="Create" ReturnAction="Return" />
+
+@code 
+{
+    private Evento evento = new();
+    private const string Uri = "/eventos";
+    private EventoForm? eventoForm;
+
+    private async Task Create()
+    {
+        var responseHttp = await repository.Post("/api/eventos", Evento);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+        EventoForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/eventos");
+    }
+
+    private void Return() => navigationManager.NavigateTo(Uri);
+}
+
