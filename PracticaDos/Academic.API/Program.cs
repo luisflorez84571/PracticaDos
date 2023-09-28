@@ -13,7 +13,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // inyecci�n de dependencias a SQL SERVER
-builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer("name=DefaultConnection"));
+builder.Services.AddDbContext<DataContext>(x => x.UseSqlServer("name=DefaultConnetion"));
 
 
 var app = builder.Build();
