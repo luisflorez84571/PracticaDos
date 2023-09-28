@@ -16,13 +16,25 @@
         </div>
     </Loading>
     <Body>
-        <table class="table table-striped">
+        <table class="table">
             <thead>
                 <tr>
-                    <th></th>
-                    <th>Academic</th>
+                    <th>Horario</th>
+                    <th>Ponente</th>
+                    <th>Tema</th>
                 </tr>
             </thead>
+            <tbody>
+                @foreach (var sesion in sesiones)
+                {
+                    <tr>
+                        <td>@sesion.Horario</td>
+                        <td>@sesion.Ponente</td>
+                        <td>@sesion.Tema</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
             <tbody>
                 @foreach (var country in Countries!)
                 {
