@@ -1,0 +1,32 @@
+﻿@page "/participantes/create"
+@using Academic.Shared.Entities;
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Crear Participante</h3>
+
+<ParticipanteForm @ref="ParticipanteForm" Participante="Participante" OnSubmit="Create" ReturnAction="Return" />
+
+@code 
+{
+    private Participante Participante = new();
+    private const string Uri = "/participantes";
+    private ParticipanteForm? ParticipanteForm;
+
+    private async Task Create()
+    {
+        var responseHttp = await repository.Post("/api/participantes", Participante);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+        ParticipanteForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/participantes");
+    }
+
+    private void Return() => navigationManager.NavigateTo(Uri);
+}
+

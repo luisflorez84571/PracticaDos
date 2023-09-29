@@ -1,0 +1,103 @@
+﻿@page "/programaciones"
+@using Academic.Shared.Entities;
+@using Academic.WEB.Repositories;
+
+
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService swal
+
+
+
+<h3>Programaciones</h3>
+
+<div class="mb-3">
+    <a class="btn btn-primary" href="/programaciones/create">Nuevo Programacion</a>
+</div>
+
+<GenericList MyList="Programaciones">
+
+    <Body>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Programacion</th>
+                    <th></th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var city in Programaciones!)
+                {
+                    <tr>
+                        <td>
+                            @city.Name
+                        </td>
+                        <td>
+                            <a href="/programaciones/edit/@city.Id" class="btn btn-warning">Editar</a>
+                            <button class="btn btn-danger" @onclick=@(() => Delete(city))>Borrar</button>
+
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </Body>
+
+</GenericList>
+
+@code {
+    public List<Programacion>? Programaciones { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        var responseHppt = await repository.Get<List<Programacion>>("api/programaciones");
+        Programaciones = responseHppt.Response!;
+    }
+
+    private async Task Delete(Programacion programacion)
+    {
+        var result = await swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "¿Esta seguro que quieres borrar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true
+            });
+
+        var confirm = string.IsNullOrEmpty(result.Value);
+
+        if (confirm)
+        {
+            return;
+        }
+
+        int id = Programacion.Id;
+        var responseHTTP = await repository.Delete($"api/programaciones/{Programacion.Id}");
+
+        if (responseHTTP.Error)
+        {
+            if (responseHTTP.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                navigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var mensajeError = await responseHTTP.GetErrorMessageAsync();
+                await swal.FireAsync("Error", mensajeError, SweetAlertIcon.Error);
+            }
+        }
+        else
+        {
+            await Load();
+        }
+    }
+
+}

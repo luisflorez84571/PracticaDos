@@ -1,0 +1,32 @@
+﻿@page "/programaciones/create"
+@using Academic.Shared.Entities;
+@inject IRepository repository
+@inject NavigationManager navigationManager
+@inject SweetAlertService sweetAlertService
+
+<h3>Crear Programacion</h3>
+
+<ProgramacionForm @ref="ProgramacionForm" Programacion="Programacion" OnSubmit="Create" ReturnAction="Return" />
+
+@code 
+{
+    private Programacion programacion = new();
+    private const string Uri = "/programaciones";
+    private ProgramacionForm? programacionForm;
+
+    private async Task Create()
+    {
+        var responseHttp = await repository.Post("/api/programaciones", Programacion);
+        if (responseHttp.Error)
+        {
+            var message = await responseHttp.GetErrorMessageAsync();
+            await sweetAlertService.FireAsync("Error", message);
+            return;
+        }
+        ProgramacionForm!.FormPostedSuccessfully = true;
+        navigationManager.NavigateTo("/programaciones");
+    }
+
+    private void Return() => navigationManager.NavigateTo(Uri);
+}
+
